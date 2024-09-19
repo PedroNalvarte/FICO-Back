@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
+const eventRoutes = require('./routes/eventRoutes')
 const { connectDB } = require('./config/dbConfig');
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(express.json());
 connectDB();
 
 app.use('/auth', authRoutes);
-
+app.use('/events', eventRoutes);
 app.get('/', (req, res) => {
     res.send('Hello Worldss!');
 });
