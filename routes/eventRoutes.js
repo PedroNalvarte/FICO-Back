@@ -3,8 +3,11 @@ const axios = require('axios');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { getEvents} = require('../controllers/eventController');
-
+const { getEvents, createEvent} = require('../controllers/eventController');
+const path = require('path')
+const { ImgurClient } = require('imgur');
+const client = new ImgurClient({ clientId: "4303c3922676c01" });
+const { createReadStream } = require('fs');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -14,7 +17,9 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-// Endpoint Listar eventos activos HU-10
+
+const upload = multer({ storage: storage });
+// Endpoint Listar eventos activos HU-04
 router.get('/getActive', async (req, res) => {
     try {
         const result = await getEvents();
@@ -25,15 +30,31 @@ router.get('/getActive', async (req, res) => {
     }
 
 });
-const upload = multer({ storage: storage });
+
+//Endpint crear eventos HU-10
 router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
-    const imagePath = req.file.path;
+   
+    const uploadPath = req.file.path;
+    console.log(req.file.path);
     try {
-        const result = await createEvent(eventData, imagePath);
+        const imgurResponse = await client.upload({
+            image: createReadStream(uploadPath),
+            type: 'stream'
+        });
+        const link = imgurResponse.data.link;
+        const result = await createEvent(eventData, link);
+
+        fs.unlink(uploadPath, (err) => {
+            if (err) {
+                console.error('Error al eliminar el archivo:', err);
+            }
+        });
         res.status(201).json(result);
+        res.status(201);
     } catch (error) {
-        res.status(500).json({ error: 'Error en el servidor'});
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor' });
     }
 
 })
