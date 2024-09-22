@@ -3,7 +3,7 @@ const axios = require('axios');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { getEvents, createEvent} = require('../controllers/eventController');
+const { getEvents, createEvent, getMyEvents} = require('../controllers/eventController');
 const path = require('path')
 const { ImgurClient } = require('imgur');
 const client = new ImgurClient({ clientId: "4303c3922676c01" });
@@ -23,7 +23,6 @@ const upload = multer({ storage: storage });
 router.get('/getActive', async (req, res) => {
     try {
         const result = await getEvents();
-        console.log(JSON.stringify(result));
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
@@ -31,7 +30,7 @@ router.get('/getActive', async (req, res) => {
 
 });
 
-//Endpint crear eventos HU-10
+//Endpoint crear eventos HU-10
 router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
    
@@ -59,5 +58,16 @@ router.post('/create', upload.single('image'), async (req, res) => {
 
 })
 
+//Endpoint listar misEventos HU-05
+router.get('/getMyEvents/:usuario', async (req, res) => {
+    try {
+        const usuario = req.params.usuario;
+        const result = await getMyEvents(usuario);
+        res.json(result);
+    } catch (error) {
+        console.error('Error al crear el evento:', error.message);
+    }
+
+});
 
 module.exports = router;
