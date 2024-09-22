@@ -1,5 +1,7 @@
+const fs = require('fs');
+const axios = require('axios');
 const { client } = require('../config/dbConfig');
-
+const { getAccessToken}  = require('../config/auth');
 const getEvents = async () => {
 
     try {
@@ -60,4 +62,74 @@ const getEvents = async () => {
     }
 };
 
-module.exports = { getEvents };
+
+async function uploadImageToOneDrive(filePath, accessToken) {
+    const fileName = filePath.split('/').pop();
+    const fileStream = fs.createReadStream(filePath); 
+
+    try {
+        const response = await axios.put(
+            `https://graph.microsoft.com/v1.0/me/drive/root:/${fileName}:/content`,
+            fileStream,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'image/jpeg' 
+                }
+            }
+        );
+        console.log('Archivo subido con éxito:', response.data);
+        return response.data;
+    } catch (error) {
+        console.log('Error al subir la imagen:', error.response ? error.response.data : error.message);
+    }
+}
+
+const createEvent = async (eventData, imagePath) => {
+    try {
+
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+            throw new Error('No se pudo obtener el token de acceso para OneDrive');
+        }
+
+        // Subir la imagen a OneDrive
+        const uploadedImage = await uploadImageToOneDrive(imagePath, accessToken);
+        if (!uploadedImage || !uploadedImage.webUrl) {
+            throw new Error('No se pudo subir la imagen a OneDrive');
+        }
+
+        // Guardar el evento en la base de datos
+        const { nombre_evento, lugar, aforo, costo, equipo_necesario, fecha, creador} = eventData;
+
+        const query = `
+            INSERT INTO public.eventos 
+            (nombre_evento, lugar, aforo, costo, equipo_necesario, fecha, estado, entradas_vendidas, imagen, creador) 
+            VALUES ($1, $2, $3, $4, $5, $6, 'A', 0, $7, $8) RETURNING id_evento;
+        `;
+
+        const values = [
+            nombre_evento,
+            lugar,
+            aforo,
+            costo,
+            equipo_necesario.join(', '),
+            fecha,
+            uploadedImage.webUrl
+        ];
+
+        const res = await client.query(query, values);
+        const eventId = res.rows[0].id_evento;
+
+        console.log('Evento creado con éxito:', eventId);
+        return { eventId, message: 'Evento creado exitosamente', imageUrl: uploadedImage.webUrl };
+    } catch (error) {
+        console.error('Error al crear el evento:', error.message);
+        throw error;
+    }
+};
+
+module.exports = { getEvents, createEvent };
+
+
+
