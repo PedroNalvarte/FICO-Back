@@ -3,7 +3,7 @@ const getEvents = async () => {
 
     try {
         const res = await client.query
-        (` SELECT 
+            (` SELECT 
                 id_evento,
 	 			nombre_evento,
 	 			lugar,
@@ -20,9 +20,9 @@ const getEvents = async () => {
                 creador
             FROM public.eventos 
             WHERE estado = 'A';`
-        );
+            );
         const events = res.rows;
-        
+
         const formatDate = (date) => {
             const months = [
                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -30,7 +30,7 @@ const getEvents = async () => {
             ];
 
             const d = new Date(date);
-            const day = d.getDate();      
+            const day = d.getDate();
             const month = months[d.getMonth()];
             return `${day} de ${month}`;
         };
@@ -48,19 +48,20 @@ const getEvents = async () => {
             };
         });
 
-        if(processedEvents.length > 0){
+        if (processedEvents.length > 0) {
             return processedEvents;
         }
-        else{
+        else {
             return "Actualmente no hay eventos activos";
         }
-       
+
     } catch (err) {
         console.error("Error executing query", err.stack);
         throw err;
     }
 };
 
+<<<<<<< HEAD
 const getMyEvents = async (usuario) => {
 
     try {
@@ -138,12 +139,44 @@ UNION
             return "Actualmente no hay eventos activos";
         }
        
+=======
+const getEventDetails = async (eventId) => {
+
+    try {
+        const res = await client.query
+            (` select id_evento, 
+            nombre_evento, 
+            lugar, 
+            aforo, 
+            fecha, 
+            costo, 
+            equipo_necesario, 
+            e.fecha_creacion, 
+            entradas_vendidas, 
+            imagen, 
+            creador, 
+            nombre
+            from eventos e
+            inner join usuarios u on e.creador = u.id_usuario
+            where id_evento = ${eventId}`
+            );
+        const events = res.rows;
+
+        if (events.length > 0) {
+            return events;
+        }
+        else {
+            return "Actualmente no hay eventos activos";
+        }
+
+>>>>>>> origin/Pedro
     } catch (err) {
         console.error("Error executing query", err.stack);
         throw err;
     }
 };
 
+<<<<<<< HEAD
 
 const createEvent = async (eventData, link) => {
     try {
@@ -182,3 +215,6 @@ module.exports = { getEvents, createEvent, getMyEvents };
 
 
 
+=======
+module.exports = { getEvents, getEventDetails };
+>>>>>>> origin/Pedro

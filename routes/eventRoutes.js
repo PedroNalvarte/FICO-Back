@@ -3,7 +3,7 @@ const axios = require('axios');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { getEvents, createEvent, getMyEvents} = require('../controllers/eventController');
+const { getEvents, createEvent, getMyEvents } = require('../controllers/eventController');
 const path = require('path')
 const { ImgurClient } = require('imgur');
 const client = new ImgurClient({ clientId: "4303c3922676c01" });
@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
+const { getEvents, getEventDetails } = require('../controllers/eventController');
 
 const upload = multer({ storage: storage });
 // Endpoint Listar eventos activos HU-04
@@ -33,7 +34,7 @@ router.get('/getActive', async (req, res) => {
 //Endpoint crear eventos HU-10
 router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
-   
+
     const uploadPath = req.file.path;
     console.log(req.file.path);
     try {
@@ -69,5 +70,20 @@ router.get('/getMyEvents/:usuario', async (req, res) => {
     }
 
 });
+
+router.get('/eventDetails/:eventId', async (req, res) => {
+
+    const eventId = req.params.eventId;
+
+    try {
+        const result = await getEventDetails(eventId);
+        console.log(JSON.stringify(result));
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+});
+
 
 module.exports = router;
