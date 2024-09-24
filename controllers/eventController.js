@@ -61,12 +61,11 @@ const getEvents = async () => {
     }
 };
 
-<<<<<<< HEAD
 const getMyEvents = async (usuario) => {
 
     try {
         const res = await client.query
-        (` SELECT 
+            (` SELECT 
                 id_evento,
 	 			nombre_evento,
 	 			lugar,
@@ -104,9 +103,9 @@ UNION
 	INNER JOIN entradas e ON e.id_evento = ev.id_evento
 	WHERE ev.estado = 'A'
 	AND e.id_usuario = ${usuario};`
-        );
+            );
         const events = res.rows;
-        
+
         const formatDate = (date) => {
             const months = [
                 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -114,7 +113,7 @@ UNION
             ];
 
             const d = new Date(date);
-            const day = d.getDate();      
+            const day = d.getDate();
             const month = months[d.getMonth()];
             return `${day} de ${month}`;
         };
@@ -132,55 +131,23 @@ UNION
             };
         });
 
-        if(processedEvents.length > 0){
+        if (processedEvents.length > 0) {
             return processedEvents;
-        }
-        else{
-            return "Actualmente no hay eventos activos";
-        }
-       
-=======
-const getEventDetails = async (eventId) => {
-
-    try {
-        const res = await client.query
-            (` select id_evento, 
-            nombre_evento, 
-            lugar, 
-            aforo, 
-            fecha, 
-            costo, 
-            equipo_necesario, 
-            e.fecha_creacion, 
-            entradas_vendidas, 
-            imagen, 
-            creador, 
-            nombre
-            from eventos e
-            inner join usuarios u on e.creador = u.id_usuario
-            where id_evento = ${eventId}`
-            );
-        const events = res.rows;
-
-        if (events.length > 0) {
-            return events;
         }
         else {
             return "Actualmente no hay eventos activos";
         }
 
->>>>>>> origin/Pedro
     } catch (err) {
         console.error("Error executing query", err.stack);
         throw err;
     }
 };
 
-<<<<<<< HEAD
 
 const createEvent = async (eventData, link) => {
     try {
-        
+
         const { nombre_evento, lugar, aforo, costo, equipo_necesario, fecha, creador } = eventData;
 
         const query = `
@@ -215,6 +182,3 @@ module.exports = { getEvents, createEvent, getMyEvents };
 
 
 
-=======
-module.exports = { getEvents, getEventDetails };
->>>>>>> origin/Pedro
