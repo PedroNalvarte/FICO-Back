@@ -145,7 +145,6 @@ UNION
     }
 };
 
-
 const createEvent = async (eventData, link) => {
     try {
 
@@ -179,7 +178,42 @@ const createEvent = async (eventData, link) => {
     }
 };
 
-module.exports = { getEvents, createEvent, getMyEvents };
+const getEventDetails = async (eventId) => {
+
+    try {
+        const res = await client.query
+            (` select id_evento, 
+            nombre_evento, 
+            lugar, 
+            aforo, 
+            fecha, 
+            costo, 
+            equipo_necesario, 
+            e.fecha_creacion, 
+            entradas_vendidas, 
+            imagen, 
+            creador, 
+            nombre
+            from eventos e
+            inner join usuarios u on e.creador = u.id_usuario
+            where id_evento = ${eventId}`
+            );
+        const events = res.rows;
+
+        if (events.length > 0) {
+            return events;
+        }
+        else {
+            return "Actualmente no hay eventos activos";
+        }
+
+    } catch (err) {
+        console.error("Error executing query", err.stack);
+        throw err;
+    }
+};
+
+module.exports = { getEvents, createEvent, getMyEvents, getEventDetails };
 
 
 
