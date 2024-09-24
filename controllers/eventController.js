@@ -1,4 +1,5 @@
 const { client } = require('../config/dbConfig');
+
 const getEvents = async () => {
 
     try {

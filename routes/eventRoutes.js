@@ -3,7 +3,7 @@ const axios = require('axios');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { getEvents, createEvent, getMyEvents } = require('../controllers/eventController');
+const { getEvents, createEvent, getMyEvents, getEventDetails } = require('../controllers/eventController');
 const path = require('path')
 const { ImgurClient } = require('imgur');
 const client = new ImgurClient({ clientId: "4303c3922676c01" });
@@ -17,7 +17,6 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
-const { getEvents, getEventDetails } = require('../controllers/eventController');
 
 const upload = multer({ storage: storage });
 // Endpoint Listar eventos activos HU-04
