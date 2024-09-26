@@ -24,6 +24,18 @@ const changePassword = async (email, password) => {
     }
 };
 
+const verifyEmail = async (email) => {
+    try {
+        const res = await client.query(`SELECT COALESCE((select true from usuarios where email = '${email}'), false) AS resultado;`);
+        const result = res.rows[0];
+        return result;
+    } catch (err) {
+        console.error("Error executing query", err.stack);
+        throw err;
+    }
+
+}
+
 //Metodos sin BD
 const resetCodeGenerator = () => {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -35,4 +47,4 @@ const resetCodeGenerator = () => {
     return codigo;
 }
 
-module.exports = { login, resetCodeGenerator, changePassword };
+module.exports = { login, resetCodeGenerator, changePassword, verifyEmail };

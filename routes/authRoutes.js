@@ -1,7 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const router = express.Router();
-const { login, resetCodeGenerator, changePassword } = require('../controllers/authController');
+const { login, resetCodeGenerator, changePassword, verifyEmail } = require('../controllers/authController');
 
 let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -38,17 +38,36 @@ router.get('/resetMail/:email', async (req, res) => {
         text: 'Tu código de recuperación es: ' + codigo
     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log('Correo enviado: ' + info.response);
-        }
-    });
+    try {
+        const emailVerify = await verifyEmail(email);
 
-    res.send({
-        "codigo": codigo,
-    })
+        if (JSON.stringify(emailVerify.resultado) === 'true') {
+
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Correo enviado: ' + info.response);
+                }
+            });
+
+            res.send({
+                "codigo": codigo,
+            })
+
+        } else {
+
+            res.send('La cuenta no existe');
+
+        }
+
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+
+
+
 
 });
 
