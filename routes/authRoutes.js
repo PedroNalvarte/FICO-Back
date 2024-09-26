@@ -31,6 +31,7 @@ router.get('/login/:email/:password', async (req, res) => {
     }
 });
 
+
 // Enviar correo
 router.get('/resetMail/:email', async (req, res) => {
     const email = req.params.email;
