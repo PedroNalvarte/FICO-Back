@@ -1,7 +1,7 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const router = express.Router();
-const { login, resetCodeGenerator, changePassword } = require('../controllers/authController');
+const { login, resetCodeGenerator, changePassword, checkEmailExists } = require('../controllers/authController');
 
 let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -23,12 +23,17 @@ router.get('/login/:email/:password', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
     }
-
 });
 
 // Enviar correo
 router.get('/resetMail/:email', async (req, res) => {
     const email = req.params.email;
+
+    // Verificar si el correo existe en la base de datos
+    const emailExists = await checkEmailExists(email);
+    if (!emailExists) {
+        return res.status(400).json({ error: 'El correo no está registrado en el sistema' });
+    }
 
     let codigo = resetCodeGenerator();
 
@@ -49,7 +54,7 @@ router.get('/resetMail/:email', async (req, res) => {
 
     res.send({
         "codigo": codigo,
-    })
+    });
 
 });
 
@@ -64,8 +69,6 @@ router.post('/resetPassword/:email/:newPassword', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
     }
-
 });
 
 module.exports = router;
-
