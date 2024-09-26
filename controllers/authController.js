@@ -24,18 +24,7 @@ const changePassword = async (email, password) => {
     }
 };
 
-// Nueva función para verificar si el correo existe en la base de datos
-const checkEmailExists = async (email) => {
-    try {
-        const res = await client.query(`SELECT * FROM usuarios WHERE email = '${email}'`);
-        return res.rows.length > 0; // Retorna true si existe, false si no
-    } catch (err) {
-        console.error("Error checking email existence", err.stack);
-        throw err;
-    }
-};
-
-// Generador de código de recuperación
+//Metodos sin BD
 const resetCodeGenerator = () => {
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let codigo = '';
@@ -44,6 +33,6 @@ const resetCodeGenerator = () => {
         codigo += caracteres.charAt(indiceAleatorio);
     }
     return codigo;
-};
+}
 
-module.exports = { login, resetCodeGenerator, changePassword, checkEmailExists };
+module.exports = { login, resetCodeGenerator, changePassword };
