@@ -2,17 +2,24 @@ const { client } = require('../config/dbConfig');
 
 const login = async (email, password) => {
     try {
-        // Modificamos la consulta para devolver el email y el id_rol
-        const res = await client.query(`SELECT email, id_rol FROM usuarios WHERE email = '${email}' AND password = '${password}'`);
+        // Verificamos si el usuario existe primero
+        const userCheck = await client.query(`SELECT * FROM usuarios WHERE email = '${email}'`);
         
-        // Verificamos si el usuario no existe o si la contraseña es incorrecta
-        if (res.rows.length === 0) {
-            return { error: "Usuario no existe o contraseña incorrecta" };
+        if (userCheck.rows.length === 0) {
+            // Si no hay filas, significa que el usuario no existe
+            return { error: "Usuario no existe" };
         }
 
-        const result = res.rows[0];  // Aquí obtendremos tanto el correo como el id_rol
+        // Ahora verificamos si la contraseña es correcta
+        const res = await client.query(`SELECT * FROM usuarios WHERE email = '${email}' AND password = '${password}'`);
+        
+        if (res.rows.length === 0) {
+            // Si el usuario existe pero la contraseña es incorrecta
+            return { error: "Contraseña incorrecta" };
+        }
 
-        // Devolvemos el email y el rol del usuario
+        // Si todo es correcto, retornamos el email y el id_rol
+        const result = res.rows[0];
         return {
             email: result.email,
             id_rol: result.id_rol
@@ -22,6 +29,7 @@ const login = async (email, password) => {
         throw err;
     }
 };
+
 
 const changePassword = async (email, password) => {
     try {
