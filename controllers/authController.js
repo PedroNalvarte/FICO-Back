@@ -2,12 +2,23 @@ const { client } = require('../config/dbConfig');
 
 const login = async (email, password) => {
     try {
-        const res = await client.query(`SELECT public.obtener_usuario2('${email}', '${password}')`);
-        const result = res.rows[0];
-        console.log(result);
-        return result;
+        // Modificamos la consulta para devolver el email y el id_rol
+        const res = await client.query(`SELECT email, id_rol FROM usuarios WHERE email = '${email}' AND password = '${password}'`);
+        
+        // Verificamos si el usuario no existe o si la contraseña es incorrecta
+        if (res.rows.length === 0) {
+            return { error: "Usuario no existe o contraseña incorrecta" };
+        }
+
+        const result = res.rows[0];  // Aquí obtendremos tanto el correo como el id_rol
+
+        // Devolvemos el email y el rol del usuario
+        return {
+            email: result.email,
+            id_rol: result.id_rol
+        };
     } catch (err) {
-        console.error("Error executing query", err.stack);
+        console.error("Error ejecutando la consulta", err.stack);
         throw err;
     }
 };
@@ -19,7 +30,7 @@ const changePassword = async (email, password) => {
         console.log(result);
         return result;
     } catch (err) {
-        console.error("Error executing query", err.stack);
+        console.error("Error ejecutando la consulta", err.stack);
         throw err;
     }
 };
@@ -30,10 +41,9 @@ const verifyEmail = async (email) => {
         const result = res.rows[0];
         return result;
     } catch (err) {
-        console.error("Error executing query", err.stack);
+        console.error("Error ejecutando la consulta", err.stack);
         throw err;
     }
-
 }
 
 //Metodos sin BD

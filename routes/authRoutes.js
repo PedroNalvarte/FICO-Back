@@ -18,8 +18,14 @@ router.get('/login/:email/:password', async (req, res) => {
 
     try {
         const result = await login(email, password);
-        console.log(JSON.stringify(result.obtener_usuario2));
-        res.json(result.obtener_usuario2);
+
+        // Si el resultado contiene un error, lo retornamos como respuesta
+        if (result.error) {
+            return res.status(400).json({ error: result.error });
+        }
+
+        // Devolver el email y el rol del usuario
+        res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
     }
@@ -42,7 +48,6 @@ router.get('/resetMail/:email', async (req, res) => {
         const emailVerify = await verifyEmail(email);
 
         if (JSON.stringify(emailVerify.resultado) === 'true') {
-
             transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
                     console.log(error);
@@ -53,22 +58,15 @@ router.get('/resetMail/:email', async (req, res) => {
 
             res.send({
                 "codigo": codigo,
-            })
+            });
 
         } else {
-
-            res.send('La cuenta no existe');
-
+            res.status(400).json({ error: 'La cuenta no existe' });
         }
 
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
     }
-
-
-
-
-
 });
 
 router.post('/resetPassword/:email/:newPassword', async (req, res) => {
