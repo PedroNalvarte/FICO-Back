@@ -35,13 +35,14 @@ router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
 
     const uploadPath = req.file.path;
-    console.log(req.file.path);
+   
     try {
         const imgurResponse = await client.upload({
             image: createReadStream(uploadPath),
             type: 'stream'
         });
         const link = imgurResponse.data.link;
+        console.log('link de imagen: ' + link);
         const result = await createEvent(eventData, link);
 
         fs.unlink(uploadPath, (err) => {

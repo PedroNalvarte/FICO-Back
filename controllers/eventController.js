@@ -166,7 +166,7 @@ const createEvent = async (eventData, link) => {
             link,
             creador
         ];
-
+        console.log('link de imagen en controller:' + values[6]);
         const res = await client.query(query, values);
         const eventId = res.rows[0].id_evento;
 
