@@ -42,6 +42,7 @@ router.post('/create', upload.single('image'), async (req, res) => {
             type: 'stream'
         });
         const link = imgurResponse.data.link;
+        console.log('imgurResponse: ' + imgurResponse);
         console.log('link de imagen: ' + link);
         const result = await createEvent(eventData, link);
 
