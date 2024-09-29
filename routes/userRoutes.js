@@ -13,7 +13,7 @@ router.get('/getUserProfile/:email', async (req, res) => {
 
 });
 
-router.get('/updatePassword/:email/:currentPassword/:newPassword/:repeatPassword', async (req, res) => {
+router.post('/updatePassword/:email/:currentPassword/:newPassword/:repeatPassword', async (req, res) => {
     try {
         const email = req.params.email;
         const currentPassword = req.params.currentPassword;

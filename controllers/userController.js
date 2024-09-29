@@ -17,7 +17,6 @@ const getUserProfile = async (email) => {
         }
         else{
             const result = res.rows[0];
-            //const avatarUrl = `https://ui-avatars.com/api/?rounded=true?name=${encodeURIComponent(result.nombre + ' ' + result.apellido)}`;
             const avatarUrl = `https://ui-avatars.com/api/?background=random&rounded=true&name=${encodeURIComponent(result.nombre + ' ' + result.apellido)}`;
             return { 
                 ...result, 
