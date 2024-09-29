@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
-const eventRoutes = require('./routes/eventRoutes')
+const eventRoutes = require('./routes/eventRoutes');
+const userRoutes = require('./routes/userRoutes')
 const { connectDB } = require('./config/dbConfig');
 
 const app = express();
@@ -16,6 +17,7 @@ connectDB();
 
 app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
+app.use('/user', userRoutes);
 app.get('/', (req, res) => {
     res.send('Hello Worldss!');
 });
