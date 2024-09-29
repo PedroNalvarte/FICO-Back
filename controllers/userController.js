@@ -32,25 +32,40 @@ const getUserProfile = async (email) => {
 }
 
 
-const editUserProfile = async (nombre, apellido, email, password, currentEmail) => {
+const updatePassword = async (email, currentPassword, newPassword, repeatPassword) => {
     try {
-        const { nombre, apellido, email, password, currentEmail } = eventData;
-        const query = `
-            UPDATE public.usuarios
-            SET nombre = '$1', apellido = '$2', email = '$3', password = '$4'
-            WHERE email = $5`;
+        const res = await client.query(`
+            SELECT password
+            FROM public.usuarios
+            WHERE email = '${email}'`);
         
-            const values = [
-                nombre,
-                apellido,
-                email,
-                password,
-                currentEmail
-            ];
+        if(res.rows.length == 0){
+            return { error: "Usuario no existe" };
+        }
+        else{
+            const oCurrentPassword = res.rows[0].password;
+            if(oCurrentPassword != currentPassword){
+                 return { error: 'La contraseña ingresada es diferente a la contraseña actual'};
+            }
+            else if(oCurrentPassword == newPassword){
+                return { error: 'La contraseña nueva no puede ser igual a la anterior'};
+            }
+            else if(newPassword != repeatPassword){
+                return { error: 'La contraseña nueva no fue repetida correctamente'};
+            }
+            else{
+                const update = await client.query(`
+                    UPDATE public.usuarios
+                    SET password = '${newPassword}'
+                    WHERE email = '${email}'`);
+                return 'Contraseña actualizada correctamente';
+            }
+        }
+            
     } catch (err) {
         console.error("Error ejecutando la consulta", err.stack);
         throw err;
     }
 }
 
-module.exports = { getUserProfile};
+module.exports = { getUserProfile, updatePassword};
