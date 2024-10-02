@@ -5,6 +5,9 @@ const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes')
 const { connectDB } = require('./config/dbConfig');
+const cloudinary = require('cloudinary').v2;
+
+
 
 const app = express();
 const port = 3001;

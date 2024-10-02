@@ -4,9 +4,16 @@ const fs = require('fs');
 const router = express.Router();
 const { getEvents, createEvent, getMyEvents, getEventDetails, editEvent, deleteEvent } = require('../controllers/eventController');
 const path = require('path')
-const { createReadStream } = require('fs');
-const admin = require("firebase-admin");
-const bucket = require('../config/firebaseConfig');
+const cloudinary = require('cloudinary').v2;
+(async function() {
+    cloudinary.config({ 
+        cloud_name: 'dyxehyhki', 
+        api_key: '939264791811866', 
+        api_secret: 'wfaFZGg-NTbimBTdT1IRrQZ7I48' // Click 'View API Keys' above to copy your API secret
+    });
+})();
+
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -33,20 +40,24 @@ router.get('/getActive', async (req, res) => {
 router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
     const uploadPath = req.file.path;
-   
+   console.log(req.file);
     try {
-        await bucket.upload(uploadPath, {
-            destination: `events/${req.file.filename}`,
+        const uploadResult = await cloudinary.uploader
+        .upload(
+            uploadPath, {
+                public_id: req.file.filename,
+            }
+        )
+        .catch((error) => {
+            console.log(error);
         });
+
+     const url = uploadResult.url;
+     console.log(url);
         fs.unlink(uploadPath, (err) => {
             if (err) {
                 console.error('Error al eliminar el archivo:', err);
             }
-        });
-        const file = bucket.file(`events/${req.file.filename}`);
-        const [url] = await file.getSignedUrl({
-            action: 'read',
-            expires: '03-09-2500'
         });
         const result = await createEvent(eventData, url);
         res.status(201).json(result);
