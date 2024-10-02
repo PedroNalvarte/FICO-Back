@@ -168,8 +168,6 @@ const createEvent = async (eventData, link) => {
         ];
         const res = await client.query(query, values);
         const eventId = res.rows[0].id_evento;
-
-        console.log('Evento creado con éxito:', eventId);
         return { eventId, message: 'Evento creado exitosamente', imageUrl: link };
     } catch (error) {
         console.error('Error al crear el evento:', error.message);
@@ -212,24 +210,41 @@ const getEventDetails = async (eventId) => {
     }
 };
 
-const editEvent = async (eventId, nombre_evento, lugar, aforo, fecha, costo, equipo_necesario, imagen) => {
+const editEvent = async (eventData, link) => {
 
     try {
-      
-        const res = await client.query
-        (` UPDATE public.events
+        const {id_evento, nombre_evento, lugar, aforo, costo, equipo_necesario, fecha } = eventData;
+        
+        const query = `
+        UPDATE public.eventos
             SET
-            nombre_evento = '${nombre_evento}',
-	        lugar = '${lugar}', 
-	        aforo = ${aforo},
-	        fecha = '${fecha}',
-	        costo = ${costo},
-	        equipo_necesario = '${equipo_necesario}',
+            nombre_evento = $2,
+	        lugar = $3, 
+	        aforo = $4,
+	        fecha = $7,
+	        costo = $5,
+	        equipo_necesario = $6,
 	        fecha_creacion = CURRENT_TIMESTAMP,
-	        imagen = '${imagen}'
-            WHERE id_evento = ${eventId};`
-        );
+	        imagen = $8
+            WHERE id_evento = $1
+            RETURNING id_evento;
+        `;
 
+        const values = [
+            id_evento,
+            nombre_evento,
+            lugar,
+            aforo,
+            costo,
+            equipo_necesario,
+            fecha,
+            link
+        ];
+
+        console.log(id_evento);
+        const res = await client.query(query, values);
+        const eventId = res.rows[0].id_evento;
+        return { eventId, message: 'Evento actualizado exitosamente', imageUrl: link };
     } catch (err) {
         console.error("Error executing query", err.stack);
         throw err;

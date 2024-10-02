@@ -40,7 +40,6 @@ router.get('/getActive', async (req, res) => {
 router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
     const uploadPath = req.file.path;
-   console.log(req.file);
     try {
         const uploadResult = await cloudinary.uploader
         .upload(
@@ -53,7 +52,6 @@ router.post('/create', upload.single('image'), async (req, res) => {
         });
 
      const url = uploadResult.url;
-     console.log(url);
         fs.unlink(uploadPath, (err) => {
             if (err) {
                 console.error('Error al eliminar el archivo:', err);
@@ -70,7 +68,7 @@ router.post('/create', upload.single('image'), async (req, res) => {
 })
 
 //Endpoint listar misEventos HU-05
-router.get('/getMyEvents',upload.single('image'), async (req, res) => {
+router.get('/getMyEvents', async (req, res) => {
     try {
         const usuario = req.params.usuario;
         const result = await getMyEvents(usuario);
@@ -95,15 +93,31 @@ router.get('/eventDetails/:eventId', async (req, res) => {
 
 });
 
-router.put('/eventUpdate/:eventId', async (req, res) => {
-
-    const eventId = req.params.eventId;
-
+router.put('/eventUpdate/', upload.single('image'), async (req, res) => {
+    const eventData = req.body;
+    const uploadPath = req.file.path;
     try {
-        const result = await editEvent(eventId, '','','','', '', '', '', '');
-        console.log(JSON.stringify(result));
-        res.json(result);
+        const uploadResult = await cloudinary.uploader
+        .upload(
+            uploadPath, {
+                public_id: req.file.filename,
+            }
+        )
+        .catch((error) => {
+            console.log(error);
+        });
+        const url = uploadResult.url;
+     
+        fs.unlink(uploadPath, (err) => {
+            if (err) {
+                console.error('Error al eliminar el archivo:', err);
+            }
+        });
+        const result = await editEvent(eventData, url);
+        res.status(201).json(result);
+        res.status(201);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Error en el servidor' });
     }
 
@@ -112,7 +126,6 @@ router.put('/eventUpdate/:eventId', async (req, res) => {
 router.delete('/eventDelete/:eventId', async (req, res) => {
 
     const eventId = req.params.eventId;
-
     try {
         const result = await deleteEvent(eventId);
         console.log(JSON.stringify(result));
