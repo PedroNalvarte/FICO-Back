@@ -212,7 +212,49 @@ const getEventDetails = async (eventId) => {
     }
 };
 
-module.exports = { getEvents, createEvent, getMyEvents, getEventDetails };
+const editEvent = async (eventId, nombre_evento, lugar, aforo, fecha, costo, equipo_necesario, imagen) => {
+
+    try {
+      
+        const res = await client.query
+        (` UPDATE public.events
+            SET
+            nombre_evento = '${nombre_evento}',
+	        lugar = '${lugar}', 
+	        aforo = ${aforo},
+	        fecha = '${fecha}',
+	        costo = ${costo},
+	        equipo_necesario = '${equipo_necesario}',
+	        fecha_creacion = CURRENT_TIMESTAMP,
+	        imagen = '${imagen}'
+            WHERE id_evento = ${eventId};`
+        );
+
+    } catch (err) {
+        console.error("Error executing query", err.stack);
+        throw err;
+    }
+};
+
+
+const deleteEvent = async (eventId) => {
+
+    try {
+      
+        const res = await client.query
+        (` UPDATE public.eventos
+            SET
+            estado = 'I'
+            WHERE id_evento = ${eventId};`
+        );
+        return {Success: "Evento eliminado correctamente"}
+    } catch (err) {
+        console.error("Error executing query", err.stack);
+        throw err;
+    }
+};
+
+module.exports = { getEvents, createEvent, getMyEvents, getEventDetails, editEvent, deleteEvent};
 
 
 

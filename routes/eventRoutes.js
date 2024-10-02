@@ -2,11 +2,11 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { getEvents, createEvent, getMyEvents, getEventDetails } = require('../controllers/eventController');
+const { getEvents, createEvent, getMyEvents, getEventDetails, editEvent, deleteEvent } = require('../controllers/eventController');
 const path = require('path')
-const { ImgurClient } = require('imgur');
-const client = new ImgurClient({ clientId: "4303c3922676c01" });
 const { createReadStream } = require('fs');
+const admin = require("firebase-admin");
+const bucket = require('../config/firebaseConfig');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
@@ -32,24 +32,23 @@ router.get('/getActive', async (req, res) => {
 //Endpoint crear eventos HU-10
 router.post('/create', upload.single('image'), async (req, res) => {
     const eventData = req.body;
-
     const uploadPath = req.file.path;
    
     try {
-        const imgurResponse = await client.upload({
-            image: createReadStream(uploadPath),
-            type: 'stream'
+        await bucket.upload(uploadPath, {
+            destination: `events/${req.file.filename}`,
         });
-        const link = imgurResponse.data.link;
-        console.log('imgurResponse: ' + imgurResponse.data);
-        console.log('link de imagen: ' + link);
-        const result = await createEvent(eventData, link);
-
         fs.unlink(uploadPath, (err) => {
             if (err) {
                 console.error('Error al eliminar el archivo:', err);
             }
         });
+        const file = bucket.file(`events/${req.file.filename}`);
+        const [url] = await file.getSignedUrl({
+            action: 'read',
+            expires: '03-09-2500'
+        });
+        const result = await createEvent(eventData, url);
         res.status(201).json(result);
         res.status(201);
     } catch (error) {
@@ -60,7 +59,7 @@ router.post('/create', upload.single('image'), async (req, res) => {
 })
 
 //Endpoint listar misEventos HU-05
-router.get('/getMyEvents/:usuario', async (req, res) => {
+router.get('/getMyEvents',upload.single('image'), async (req, res) => {
     try {
         const usuario = req.params.usuario;
         const result = await getMyEvents(usuario);
@@ -85,5 +84,32 @@ router.get('/eventDetails/:eventId', async (req, res) => {
 
 });
 
+router.put('/eventUpdate/:eventId', async (req, res) => {
+
+    const eventId = req.params.eventId;
+
+    try {
+        const result = await editEvent(eventId, '','','','', '', '', '', '');
+        console.log(JSON.stringify(result));
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+});
+
+router.delete('/eventDelete/:eventId', async (req, res) => {
+
+    const eventId = req.params.eventId;
+
+    try {
+        const result = await deleteEvent(eventId);
+        console.log(JSON.stringify(result));
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+});
 
 module.exports = router;

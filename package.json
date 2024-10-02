@@ -18,6 +18,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "fico-back": "file:",
+    "firebase": "^10.14.0",
+    "firebase-admin": "^12.6.0",
     "formidable": "^3.5.1",
     "imgur": "^2.4.2",
     "msal": "^1.4.18",
