@@ -1,13 +1,13 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
 const router = express.Router();
-const { login, resetCodeGenerator, changePassword, verifyEmail } = require('../controllers/authController');
+const { login, resetCodeGenerator, changePassword, verifyEmail, registerUser, changeNotificationStatus } = require('../controllers/authController');
 
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'auth.app.fico@gmail.com',
-        pass: 'bwsc jrdn ubpp lilo' // Recuerda usar una contraseña de aplicación si usas Gmail
+        pass: 'bwsc jrdn ubpp lilo'
     }
 });
 
@@ -81,6 +81,39 @@ router.post('/resetPassword/:email/:newPassword', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
     }
+});
+
+router.post('/registerUser', async (req, res) => {
+
+    const { nombre, apellido, email, password } = req.body;
+
+    try {
+        const result = await registerUser(nombre, apellido, email, password);
+        res.json(result.registrar_usuario);
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
+router.post('/notificationsState/:idUsuario/:nuevoEstado', async (req, res) => {
+
+    const idUsuario = req.params.idUsuario;
+    const nuevoEstado = req.params.nuevoEstado;
+
+    try {
+        const result = await changeNotificationStatus(idUsuario, nuevoEstado);
+
+        if (result.result.length > 7) {
+            res.send(result.result);
+            return
+        }
+
+        res.send('Estado cambiado corrctamente a ' + result.result);
+
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
 });
 
 module.exports = router;
