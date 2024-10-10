@@ -386,7 +386,7 @@ const getRequests = async () => {
             return processedEvents;
         }
         else {
-            return "Actualmente no hay solicitudes";
+            return "No hay solicitudes en este momento";
         }
 
     } catch (err) {
