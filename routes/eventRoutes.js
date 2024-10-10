@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
-const { getEvents, createEvent, getMyEvents, getEventDetails, editEvent, deleteEvent } = require('../controllers/eventController');
+const { getEvents, createEvent, getMyEvents, getEventDetails, editEvent, deleteEvent, requestEvent, aceptEvent, denyEvent, getRequests } = require('../controllers/eventController');
 const path = require('path')
 const cloudinary = require('cloudinary').v2;
 (async function() {
@@ -132,6 +132,73 @@ router.delete('/eventDelete/:eventId', async (req, res) => {
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+});
+
+router.post('/eventRequest', upload.single('image'), async (req, res) => {
+    const eventData = req.body;
+    const uploadPath = req.file.path;
+    try {
+        const uploadResult = await cloudinary.uploader
+        .upload(
+            uploadPath, {
+                public_id: req.file.filename,
+            }
+        )
+        .catch((error) => {
+            console.log(error);
+        });
+
+     const url = uploadResult.url;
+        fs.unlink(uploadPath, (err) => {
+            if (err) {
+                console.error('Error al eliminar el archivo:', err);
+            }
+        });
+        const result = await requestEvent(eventData, url);
+        res.status(201).json(result);
+        res.status(201);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+})
+
+router.put('/aceptEvent/:eventId', async (req, res) => {
+
+    const eventId = req.params.eventId;
+    try {
+        const result = await aceptEvent(eventId);
+        console.log(JSON.stringify(result));
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+});
+
+router.put('/denyEvent/:eventId', async (req, res) => {
+
+    const eventId = req.params.eventId;
+    try {
+        const result = await denyEvent(eventId);
+        console.log(JSON.stringify(result));
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+});
+
+
+router.get('/getRequests', async (req, res) => {
+    try {
+        const result = await getRequests();
+        res.json(result);
+    } catch (error) {
+        console.error('Error al crear el evento:', error.message);
     }
 
 });
