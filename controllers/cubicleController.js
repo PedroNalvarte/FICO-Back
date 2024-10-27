@@ -51,18 +51,20 @@ const reserveCubicle = async (reserveData) => {
 const getAvailableCubicles = async () => {
     try{
         const res = await client.query
-        (` SELECT id_cubiculo, nombre_cubiculo, capacidad
-            FROM public.cubiculos
-            WHERE id_cubiculo IN
-                (SELECT id_cubiculo
-                FROM public.reservas_cubiculos
-                WHERE 
-                    CASE
-                        WHEN cantidad_horas = 1 THEN hora_reserva != DATE_TRUNC('hour', NOW() AT TIME ZONE 'America/Lima')::time
-                        WHEN cantidad_horas = 2 THEN hora_reserva != DATE_TRUNC('hour', NOW() AT TIME ZONE 'America/Lima')::time AND hora_reserva + INTERVAL '1 hour' != DATE_TRUNC('hour', NOW() AT TIME ZONE 'America/Lima')::time
-                    END
-                    AND fecha_reserva = CURRENT_DATE)
-            AND estado = 'A';`
+        (` SELECT 
+                id_cubiculo,
+                nombre_cubiculo,
+                capacidad 
+            FROM 
+                public.cubiculos
+            WHERE 
+                id_cubiculo  IN (
+                        SELECT id_cubiculo
+                        FROM reservas_cubiculos
+                        WHERE fecha_reserva = CURRENT_DATE
+                        GROUP BY id_cubiculo
+                        HAVING SUM(cantidad_horas) < 13)
+                AND estado = 'A';`
         );
         const cubicles = res.rows;
         return cubicles;
@@ -75,18 +77,20 @@ const getAvailableCubicles = async () => {
 const getNotAvailableCubicles = async () => {
     try{
         const res = await client.query
-        (` SELECT id_cubiculo, nombre_cubiculo, capacidad
-            FROM public.cubiculos
-            WHERE id_cubiculo NOT IN
-                (SELECT id_cubiculo
-                FROM public.reservas_cubiculos
-                WHERE 
-                    CASE
-                        WHEN cantidad_horas = 1 THEN hora_reserva != DATE_TRUNC('hour', NOW() AT TIME ZONE 'America/Lima')::time
-                        WHEN cantidad_horas = 2 THEN hora_reserva != DATE_TRUNC('hour', NOW() AT TIME ZONE 'America/Lima')::time AND hora_reserva + INTERVAL '1 hour' != DATE_TRUNC('hour', NOW() AT TIME ZONE 'America/Lima')::time
-                    END
-                    AND fecha_reserva = CURRENT_DATE)
-            AND estado = 'A';`
+        (` SELECT 
+                id_cubiculo,
+                nombre_cubiculo,
+                capacidad 
+            FROM 
+                public.cubiculos
+            WHERE 
+                id_cubiculo NOT IN (
+                        SELECT id_cubiculo
+                        FROM reservas_cubiculos
+                        WHERE fecha_reserva = CURRENT_DATE
+                        GROUP BY id_cubiculo
+                        HAVING SUM(cantidad_horas) < 13)
+                AND estado = 'A';`
         );
         const cubicles = res.rows;
         return cubicles;
