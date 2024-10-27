@@ -99,10 +99,31 @@ const getNotAvailableCubicles = async () => {
 const getReservedHoursByCubicle = async(id) => {
     try{
         const res = await client.query
-        (` SELECT hora_reserva
-            FROM public.reservas_cubiculos
-            WHERE id_cubiculo = ${id}
-            AND fecha_reserva = CURRENT_DATE;`
+        (` SELECT 
+                hora_reserva
+            FROM 
+                reservas_cubiculos
+            WHERE 
+                cantidad_horas = 1
+                AND id_cubiculo = ${id}
+            UNION ALL
+
+            SELECT 
+                hora_reserva AS hora_reserva
+            FROM 
+                reservas_cubiculos
+            WHERE 
+                cantidad_horas = 2
+                AND id_cubiculo = ${id}
+            UNION ALL
+
+            SELECT 
+                hora_reserva + INTERVAL '1 hour' AS hora_reserva
+            FROM 
+                reservas_cubiculos
+            WHERE 
+                cantidad_horas = 2
+                AND id_cubiculo = ${id};`
         );
         const hours = res.rows.map(row => row.hora_reserva);
         return hours;
