@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes')
 const paymentRoutes = require('./routes/paymentRoutes');
+const cubicleRoutes = require('./routes/cubicleRoutes');
 const { connectDB } = require('./config/dbConfig');
 const cloudinary = require('cloudinary').v2;
 
@@ -22,7 +23,8 @@ connectDB();
 app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
 app.use('/user', userRoutes);
-app.use('/payment', paymentRoutes)
+app.use('/payment', paymentRoutes);
+app.use('/cubicles', cubicleRoutes);
 app.get('/', (req, res) => {
     res.send('Hello Worldss!');
 });
