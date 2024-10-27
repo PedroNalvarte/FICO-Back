@@ -96,4 +96,20 @@ const getNotAvailableCubicles = async () => {
     }
 }
 
-module.exports = {createCubicle, reserveCubicle, getAvailableCubicles, getNotAvailableCubicles};
+const getReservedHoursByCubicle = async(id) => {
+    try{
+        const res = await client.query
+        (` SELECT hora_reserva
+            FROM public.reservas_cubiculos
+            WHERE id_cubiculo = ${id}
+            AND fecha_reserva = CURRENT_DATE;`
+        );
+        const hours = res.rows.map(row => row.hora_reserva);
+        return hours;
+    } catch (error) {
+        console.error('Error al obtener las horas:', error.message);
+        throw error;
+    }
+}
+
+module.exports = {createCubicle, reserveCubicle, getAvailableCubicles, getNotAvailableCubicles, getReservedHoursByCubicle};
