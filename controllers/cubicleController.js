@@ -4,7 +4,7 @@ const { client } = require('../config/dbConfig');
 const createCubicle = async (name, capacity) => {
     try {
 
-        
+
         const result = await client.query(`
             INSERT INTO public.cubiculos 
             (nombre_cubiculo, capacidad, estado, disponibilidad) 
@@ -12,7 +12,7 @@ const createCubicle = async (name, capacity) => {
         `);
 
         const cubicleId = result.rows[0].id_cubiculo;
-        return { cubicleId, message: 'Cubiculo creado exitosamente'};
+        return { cubicleId, message: 'Cubiculo creado exitosamente' };
     } catch (error) {
         console.error('Error al crear el cubiculo:', error.message);
         throw error;
@@ -21,9 +21,9 @@ const createCubicle = async (name, capacity) => {
 
 const reserveCubicle = async (reserveData) => {
     try {
-        const { id_usuario, id_cubiculo, hora_reserva, cantidad_horas} = reserveData;
+        const { id_usuario, id_cubiculo, hora_reserva, cantidad_horas } = reserveData;
 
-        if(cantidad_horas > 0 && cantidad_horas <= 2){
+        if (cantidad_horas > 0 && cantidad_horas <= 2) {
             const query = `INSERT INTO public.reservas_cubiculos
                 (id_usuario, id_cubiculo, fecha_reserva, hora_reserva, cantidad_horas, estado, fecha_creacion)
                 VALUES ($1, $2, NOW(), $3, $4,'A', NOW()) RETURNING id_reserva;
@@ -36,12 +36,12 @@ const reserveCubicle = async (reserveData) => {
             ];
             const res = await client.query(query, values);
             const reservaId = res.rows[0].id_reserva;
-            return { reservaId, message: 'Reserva creada exitosamente'};
-        }else{
-            return { error: 'Cantidad de horas no puede ser mayor a 2'};
+            return { reservaId, message: 'Reserva creada exitosamente' };
+        } else {
+            return { error: 'Cantidad de horas no puede ser mayor a 2' };
         }
 
-       
+
     } catch (error) {
         console.error('Error al crear el cubiculo:', error.message);
         throw error;
@@ -49,9 +49,9 @@ const reserveCubicle = async (reserveData) => {
 };
 
 const getAvailableCubicles = async () => {
-    try{
+    try {
         const res = await client.query
-        (` SELECT 
+            (` SELECT 
                 id_cubiculo,
                 nombre_cubiculo,
                 capacidad 
@@ -65,19 +65,19 @@ const getAvailableCubicles = async () => {
                         GROUP BY id_cubiculo
                         HAVING SUM(cantidad_horas) < 13)
                 AND estado = 'A';`
-        );
+            );
         const cubicles = res.rows;
         return cubicles;
-    }   catch (error) {
+    } catch (error) {
         console.error('Error al obtener los cubiculos:', error.message);
         throw error;
     }
 }
 
 const getNotAvailableCubicles = async () => {
-    try{
+    try {
         const res = await client.query
-        (` SELECT 
+            (` SELECT 
                 id_cubiculo,
                 nombre_cubiculo,
                 capacidad 
@@ -91,19 +91,19 @@ const getNotAvailableCubicles = async () => {
                         GROUP BY id_cubiculo
                         HAVING SUM(cantidad_horas) < 13)
                 AND estado = 'A';`
-        );
+            );
         const cubicles = res.rows;
         return cubicles;
-    }   catch (error) {
+    } catch (error) {
         console.error('Error al obtener los cubiculos:', error.message);
         throw error;
     }
 }
 
-const getReservedHoursByCubicle = async(id) => {
-    try{
+const getReservedHoursByCubicle = async (id) => {
+    try {
         const res = await client.query
-        (` SELECT 
+            (` SELECT 
                 hora_reserva
             FROM 
                 reservas_cubiculos
@@ -128,7 +128,7 @@ const getReservedHoursByCubicle = async(id) => {
             WHERE 
                 cantidad_horas = 2
                 AND id_cubiculo = ${id};`
-        );
+            );
         const hours = res.rows.map(row => row.hora_reserva);
         return hours;
     } catch (error) {
@@ -137,4 +137,24 @@ const getReservedHoursByCubicle = async(id) => {
     }
 }
 
-module.exports = {createCubicle, reserveCubicle, getAvailableCubicles, getNotAvailableCubicles, getReservedHoursByCubicle};
+const getReservedCubicleDetails = async (id) => {
+    try {
+        const res = await client.query
+            (` 
+            select rc.id_reserva, rc.id_usuario, u.nombre, u.apellido, rc.id_cubiculo, c.nombre_cubiculo,
+                    c.capacidad, rc.fecha_reserva, rc.hora_reserva, rc.cantidad_horas
+                from reservas_cubiculos rc
+                inner join usuarios u on rc.id_usuario = u.id_usuario
+                inner join cubiculos c on c.id_cubiculo = rc.id_cubiculo
+            where id_reserva = ${id}
+        `
+            );
+        const cubicles = res.rows;
+        return cubicles;
+    } catch (error) {
+        console.error('Error al obtener las horas:', error.message);
+        throw error;
+    }
+}
+
+module.exports = { createCubicle, reserveCubicle, getAvailableCubicles, getNotAvailableCubicles, getReservedHoursByCubicle, getReservedCubicleDetails };

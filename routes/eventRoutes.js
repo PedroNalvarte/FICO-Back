@@ -3,12 +3,12 @@ const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
 const { getEvents, createEvent, getMyEvents, getEventDetails, editEvent, deleteEvent, requestEvent, aceptEvent, denyEvent, getRequests } = require('../controllers/eventController');
-const path = require('path')
+const path = require('path');
 const cloudinary = require('cloudinary').v2;
-(async function() {
-    cloudinary.config({ 
-        cloud_name: 'dyxehyhki', 
-        api_key: '939264791811866', 
+(async function () {
+    cloudinary.config({
+        cloud_name: 'dyxehyhki',
+        api_key: '939264791811866',
         api_secret: 'wfaFZGg-NTbimBTdT1IRrQZ7I48' // Click 'View API Keys' above to copy your API secret
     });
 })();
@@ -42,16 +42,16 @@ router.post('/create', upload.single('image'), async (req, res) => {
     const uploadPath = req.file.path;
     try {
         const uploadResult = await cloudinary.uploader
-        .upload(
-            uploadPath, {
+            .upload(
+                uploadPath, {
                 public_id: req.file.filename,
             }
-        )
-        .catch((error) => {
-            console.log(error);
-        });
+            )
+            .catch((error) => {
+                console.log(error);
+            });
 
-     const url = uploadResult.url;
+        const url = uploadResult.url;
         fs.unlink(uploadPath, (err) => {
             if (err) {
                 console.error('Error al eliminar el archivo:', err);
@@ -98,16 +98,16 @@ router.put('/eventUpdate/', upload.single('image'), async (req, res) => {
     const uploadPath = req.file.path;
     try {
         const uploadResult = await cloudinary.uploader
-        .upload(
-            uploadPath, {
+            .upload(
+                uploadPath, {
                 public_id: req.file.filename,
             }
-        )
-        .catch((error) => {
-            console.log(error);
-        });
+            )
+            .catch((error) => {
+                console.log(error);
+            });
         const url = uploadResult.url;
-     
+
         fs.unlink(uploadPath, (err) => {
             if (err) {
                 console.error('Error al eliminar el archivo:', err);
@@ -141,16 +141,16 @@ router.post('/eventRequest', upload.single('image'), async (req, res) => {
     const uploadPath = req.file.path;
     try {
         const uploadResult = await cloudinary.uploader
-        .upload(
-            uploadPath, {
+            .upload(
+                uploadPath, {
                 public_id: req.file.filename,
             }
-        )
-        .catch((error) => {
-            console.log(error);
-        });
+            )
+            .catch((error) => {
+                console.log(error);
+            });
 
-     const url = uploadResult.url;
+        const url = uploadResult.url;
         fs.unlink(uploadPath, (err) => {
             if (err) {
                 console.error('Error al eliminar el archivo:', err);
