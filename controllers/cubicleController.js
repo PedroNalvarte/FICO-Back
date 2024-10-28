@@ -52,19 +52,25 @@ const getAvailableCubicles = async () => {
     try {
         const res = await client.query
             (` SELECT 
-                id_cubiculo,
-                nombre_cubiculo,
-                capacidad 
-            FROM 
-                public.cubiculos
-            WHERE 
-                id_cubiculo  IN (
-                        SELECT id_cubiculo
-                        FROM reservas_cubiculos
-                        WHERE fecha_reserva = CURRENT_DATE
-                        GROUP BY id_cubiculo
-                        HAVING SUM(cantidad_horas) < 13)
-                AND estado = 'A';`
+                    c.id_cubiculo,
+                    c.nombre_cubiculo,
+                    c.capacidad 
+                FROM 
+                    public.cubiculos c
+                LEFT JOIN (
+                    SELECT 
+                        id_cubiculo,
+                        SUM(cantidad_horas) AS total_horas
+                    FROM 
+                        reservas_cubiculos
+                    WHERE 
+                        fecha_reserva = CURRENT_DATE
+                    GROUP BY 
+                        id_cubiculo
+                ) r ON c.id_cubiculo = r.id_cubiculo
+                WHERE 
+                    (r.total_horas IS NULL OR r.total_horas < 13)
+                    AND c.estado = 'A';`
             );
         const cubicles = res.rows;
         return cubicles;
@@ -77,20 +83,26 @@ const getAvailableCubicles = async () => {
 const getNotAvailableCubicles = async () => {
     try {
         const res = await client.query
-            (` SELECT 
-                id_cubiculo,
-                nombre_cubiculo,
-                capacidad 
+            (`SELECT 
+                c.id_cubiculo,
+                c.nombre_cubiculo,
+                c.capacidad 
             FROM 
-                public.cubiculos
+                public.cubiculos c
+            JOIN (
+                SELECT 
+                    id_cubiculo,
+                    SUM(cantidad_horas) AS total_horas
+                FROM 
+                    reservas_cubiculos
+                WHERE 
+                    fecha_reserva = CURRENT_DATE
+                GROUP BY 
+                    id_cubiculo
+            ) r ON c.id_cubiculo = r.id_cubiculo
             WHERE 
-                id_cubiculo NOT IN (
-                        SELECT id_cubiculo
-                        FROM reservas_cubiculos
-                        WHERE fecha_reserva = CURRENT_DATE
-                        GROUP BY id_cubiculo
-                        HAVING SUM(cantidad_horas) < 13)
-                AND estado = 'A';`
+                r.total_horas >= 13
+                AND c.estado = 'A';`
             );
         const cubicles = res.rows;
         return cubicles;
