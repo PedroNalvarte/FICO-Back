@@ -22,10 +22,10 @@ const createCubicle = async (name, capacity) => {
 const reserveCubicle = async (reserveData) => {
     try {
         const { email, id_cubiculo, hora_reserva, cantidad_horas } = reserveData;
-        
+
         if (cantidad_horas > 0 && cantidad_horas <= 2) {
             var id_usuario = await client.query(`SELECT id_usuario FROM public.usuarios
-            WHERE email = '${email}'`); 
+            WHERE email = '${email}'`);
             id_usuario = id_usuario.rows[0].id_usuario;
 
             const query = `INSERT INTO public.reservas_cubiculos
@@ -162,7 +162,7 @@ const getReservedCubicleDetails = async (id) => {
                 from reservas_cubiculos rc
                 inner join usuarios u on rc.id_usuario = u.id_usuario
                 inner join cubiculos c on c.id_cubiculo = rc.id_cubiculo
-            where id_reserva = ${id}
+            where rc.id_cubiculo = ${id}
         `
             );
         const cubicles = res.rows;
