@@ -21,9 +21,13 @@ const createCubicle = async (name, capacity) => {
 
 const reserveCubicle = async (reserveData) => {
     try {
-        const { id_usuario, id_cubiculo, hora_reserva, cantidad_horas } = reserveData;
-
+        const { email, id_cubiculo, hora_reserva, cantidad_horas } = reserveData;
+        
         if (cantidad_horas > 0 && cantidad_horas <= 2) {
+            var id_usuario = await client.query(`SELECT id_usuario FROM public.usuarios
+            WHERE email = '${email}'`); 
+            id_usuario = id_usuario.rows[0].id_usuario;
+
             const query = `INSERT INTO public.reservas_cubiculos
                 (id_usuario, id_cubiculo, fecha_reserva, hora_reserva, cantidad_horas, estado, fecha_creacion)
                 VALUES ($1, $2, NOW(), $3, $4,'A', NOW()) RETURNING id_reserva;
@@ -43,7 +47,7 @@ const reserveCubicle = async (reserveData) => {
 
 
     } catch (error) {
-        console.error('Error al crear el cubiculo:', error.message);
+        console.error('Error al reservar el cubiculo:', error.message);
         throw error;
     }
 };
