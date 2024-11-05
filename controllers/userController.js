@@ -7,7 +7,9 @@ const getUserProfile = async (email) => {
                 nombre,
                 apellido,
                 email,
-                password 
+                password,
+                carrera_acad,
+                ciclo
             FROM public.usuarios
             WHERE email = '${email}';
             `);
@@ -67,4 +69,40 @@ const updatePassword = async (email, currentPassword, newPassword, repeatPasswor
     }
 }
 
-module.exports = { getUserProfile, updatePassword};
+const updateDegree = async (email, degree, semester) => {
+    try {
+        if(semester < 0)
+        {
+            return { error: "Ciclo no válido, el ciclo debe ser mayor a 0" };
+
+        }
+        else if (degree != "Medicina Humana" && semester > 10){
+            return { error: "Ciclo no válido, el ciclo debe ser menor o igual a 10"};
+        }
+        else if(degree == "Medicina Humana" && semester > 14){
+            return { error: "Ciclo no válido, el ciclo debe ser menor o igual a 14"};
+        }
+        const res = await client.query(`
+            SELECT *
+            FROM public.usuarios
+            WHERE email = '${email}'`);
+        
+        if(res.rows.length == 0){
+            return { error: "Usuario no existe" };
+        }
+        else{
+             await client.query(`
+                    UPDATE public.usuarios
+                    SET  carrera_acad= '${degree}', 
+                    ciclo = '${semester}'
+                    WHERE email = '${email}'`);
+                return { exito: "Carrera y ciclo actualizado correctamente"};    
+        }
+            
+    } catch (err) {
+        console.error("Error ejecutando la consulta", err.stack);
+        throw err;
+    }
+}
+
+module.exports = { getUserProfile, updatePassword, updateDegree};
