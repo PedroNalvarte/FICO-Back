@@ -85,10 +85,10 @@ router.post('/resetPassword/:email/:newPassword', async (req, res) => {
 
 router.post('/registerUser', async (req, res) => {
 
-    const { nombre, apellido, email, password } = req.body;
+    const { nombre, apellido, email, password, grade, period } = req.body;
 
     try {
-        const result = await registerUser(nombre, apellido, email, password);
+        const result = await registerUser(nombre, apellido, email, password, grade, period);
         res.json(result.registrar_usuario);
     } catch (error) {
         res.status(500).json({ error: 'Error en el servidor' });

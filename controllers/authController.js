@@ -54,13 +54,15 @@ const verifyEmail = async (email) => {
     }
 }
 
-const registerUser = async (nombre, apellido, email, password) => {
+const registerUser = async (nombre, apellido, email, password, grade, period) => {
     try {
         const res = await client.query(`SELECT public.registrar_usuario(
             '${nombre}',
             '${apellido}',
             '${email}',
-            '${password}'
+            '${password}',
+            '${grade}',
+            ${period}
         )`);
         const result = res.rows[0];
         return result;
