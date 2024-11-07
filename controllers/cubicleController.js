@@ -157,7 +157,8 @@ const getReservedCubicleDetails = async (id) => {
     try {
         const res = await client.query
             (` 
-            select rc.id_reserva, rc.id_usuario, u.nombre, u.apellido, rc.id_cubiculo, c.nombre_cubiculo,
+            select rc.id_reserva, rc.id_usuario, u.nombre, u.apellido, u.carrera_acad, u.ciclo,
+					rc.id_cubiculo, c.nombre_cubiculo,
                     c.capacidad, rc.fecha_reserva, rc.hora_reserva, rc.cantidad_horas
                 from reservas_cubiculos rc
                 inner join usuarios u on rc.id_usuario = u.id_usuario
